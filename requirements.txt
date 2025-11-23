@@ -1,0 +1,4 @@
+nicegui==1.4.21
+requests==2.31.0
+pillow==10.2.0
+python-multipart==0.0.9
