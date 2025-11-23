@@ -43,15 +43,15 @@ class BackgroundRemover:
             # نمایش تصویر آپلود شده
             img_base64 = base64.b64encode(self.uploaded_file).decode()
             self.original_img.set_source(f"data:image/jpeg;base64,{img_base64}")
-            self.original_img.set_visibility(True)
+            self.original_img.visible = True
 
             # به‌روزرسانی اطلاعات فایل
             self.file_info.set_text(f"فایل: {self.file_name} | حجم: {len(self.uploaded_file) // 1024} KB")
-            self.file_info.set_visibility(True)
+            self.file_info.visible = True
 
             # فعال کردن دکمه پردازش
-            self.process_btn.set_enabled(True)
-            self.result_area.set_visibility(False)
+            self.process_btn.enabled = True
+            self.result_area.visible = False
 
             ui.notify("✅ تصویر با موفقیت آپلود شد!", type='positive')
 
@@ -66,9 +66,9 @@ class BackgroundRemover:
 
         try:
             # نمایش وضعیت پردازش
-            self.progress.set_visibility(True)
+            self.progress.visible = True
             self.status_text.set_text("در حال ارسال به سرور...")
-            self.process_btn.set_enabled(False)
+            self.process_btn.enabled = False
 
             # ارسال درخواست به API
             response = requests.post(
@@ -85,10 +85,10 @@ class BackgroundRemover:
                 # نمایش تصویر پردازش شده
                 processed_base64 = base64.b64encode(self.processed_image).decode()
                 self.processed_img.set_source(f"data:image/png;base64,{processed_base64}")
-                self.processed_img.set_visibility(True)
+                self.processed_img.visible = True
 
                 # نمایش بخش نتیجه
-                self.result_area.set_visibility(True)
+                self.result_area.visible = True
 
                 # به‌روزرسانی آمار
                 app.storage.general['stats']['processed_count'] += 1
@@ -107,8 +107,8 @@ class BackgroundRemover:
             self.status_text.set_text("❌ خطا در پردازش")
             ui.notify(f"خطا: {str(ex)}", type='negative')
         finally:
-            self.progress.set_visibility(False)
-            self.process_btn.set_enabled(True)
+            self.progress.visible = False
+            self.process_btn.enabled = True
 
     def _handle_api_error(self, response):
         """مدیریت خطاهای API"""
@@ -152,11 +152,11 @@ class BackgroundRemover:
         self.file_name = ""
         self.processed_image = None
 
-        self.original_img.set_visibility(False)
-        self.processed_img.set_visibility(False)
-        self.file_info.set_visibility(False)
-        self.result_area.set_visibility(False)
-        self.process_btn.set_enabled(False)
+        self.original_img.visible = False
+        self.processed_img.visible = False
+        self.file_info.visible = False
+        self.result_area.visible = False
+        self.process_btn.enabled = False
         self.status_text.set_text("آماده برای آپلود")
 
         ui.notify("همه چیز بازنشانی شد", type='info')
@@ -183,18 +183,17 @@ class BackgroundRemover:
                     ).classes('w-full')
                     upload.props('accept="image/*"')
 
-                    # محتوای منطقه آپلود
+                    # محتوای منطقه آپلود با المان‌های ساده NiceGUI
                     with upload:
-                        ui.html('''
-                            <div style="text-align: center; padding: 2rem; border: 2px dashed #cbd5e0; border-radius: 0.5rem; cursor: pointer;">
-                                <div style="font-size: 3rem;">📁</div>
-                                <div style="font-size: 1.125rem; font-weight: 500; margin-top: 0.5rem;">تصویر خود را اینجا رها کنید یا کلیک کنید</div>
-                                <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">فرمت‌های مجاز: JPG, PNG, GIF | حداکثر حجم: 5MB</div>
-                            </div>
-                        ''')
+                        with ui.column().classes(
+                                'items-center gap-2 p-8 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer'):
+                            ui.icon('folder_open', size='xl').classes('text-4xl text-blue-500')
+                            ui.label('تصویر خود را اینجا رها کنید یا کلیک کنید').classes('text-lg font-medium')
+                            ui.label('فرمت‌های مجاز: JPG, PNG, GIF').classes('text-sm text-gray-500')
+                            ui.label('حداکثر حجم: 5MB').classes('text-sm text-gray-500')
 
                     self.file_info = ui.label().classes('text-sm text-gray-600 mt-2')
-                    self.file_info.set_visibility(False)
+                    self.file_info.visible = False
 
             # بخش وضعیت و آمار
             with ui.row().classes('w-full justify-between items-center'):
@@ -203,7 +202,7 @@ class BackgroundRemover:
 
                 self.status_text = ui.label('آماده برای آپلود').classes('text-lg font-semibold')
                 self.progress = ui.spinner(size='lg')
-                self.progress.set_visibility(False)
+                self.progress.visible = False
 
             # بخش تصاویر
             with ui.row().classes('w-full justify-around items-start gap-8 mt-4'):
@@ -212,14 +211,14 @@ class BackgroundRemover:
                     ui.label('📷 تصویر اصلی').classes('text-lg font-semibold')
                     self.original_img = ui.image().classes(
                         'w-64 h-64 object-contain border-2 border-dashed border-gray-300 rounded-lg')
-                    self.original_img.set_visibility(False)
+                    self.original_img.visible = False
 
                 # تصویر پردازش شده
                 with ui.column().classes('items-center gap-3'):
                     ui.label('🎯 تصویر پردازش شده').classes('text-lg font-semibold')
                     self.processed_img = ui.image().classes(
                         'w-64 h-64 object-contain border-2 border-dashed border-green-300 rounded-lg')
-                    self.processed_img.set_visibility(False)
+                    self.processed_img.visible = False
 
             # دکمه‌های کنترل
             with ui.row().classes('w-full justify-center gap-4 mt-6'):
@@ -228,7 +227,7 @@ class BackgroundRemover:
                     on_click=self.remove_background,
                     icon='auto_fix_high'
                 ).classes('bg-green-500 text-white')
-                self.process_btn.set_enabled(False)
+                self.process_btn.enabled = False
 
                 ui.button(
                     'پاک کردن همه',
@@ -238,13 +237,17 @@ class BackgroundRemover:
 
             # بخش نتیجه
             with ui.column().classes('w-full items-center gap-4 mt-6') as self.result_area:
-                self.result_area.set_visibility(False)
+                self.result_area.visible = False
 
                 ui.button(
                     'دانلود تصویر پردازش شده',
                     on_click=self.download_image,
                     icon='download'
                 ).classes('bg-blue-500 text-white')
+
+        # فوتر
+        with ui.footer().classes('bg-gray-100 text-center p-4'):
+            ui.label('ساخته شده با NiceGUI | حذف کننده پس‌زمینه تصاویر').classes('text-gray-600')
 
 
 # صفحه اصلی
